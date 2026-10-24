@@ -23,22 +23,24 @@ jobs:
           PYTHONPATH=terraform/lambda pytest terraform/lambda/test_lambda.py
 
   deploy:
-  
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
       - name: Deploy Frontend to S3
         run: |
           aws s3 cp index.html s3://shani-cloud-resume-2026/index.html
           aws s3 cp style.css s3://shani-cloud-resume-2026/style.css
 
-      - name: Invalidate CloudFront Cache
-        run: |
-          aws cloudfront create-invalidation --distribution-id EULWK7NB8S38I --paths "/*"
-      
-      - name: Deploy Frontend to S3
-        run: |
-          aws s3 cp index.html s3://shani-cloud-resume-2026/index.html
-          aws s3 cp style.css s3://shani-cloud-resume-2026/style.css
-
-      
       - name: Invalidate CloudFront Cache
         run: |
           aws cloudfront create-invalidation --distribution-id EULWK7NB8S38I --paths "/*"
