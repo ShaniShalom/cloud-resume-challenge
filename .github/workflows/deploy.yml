@@ -22,7 +22,7 @@ jobs:
       - name: Run Tests
         run: |
           pip install pytest
-          pytest lambda/test_lambda.py
+          PYTHONPATH=terraform/lambda pytest terraform/lambda/test_lambda.py
 
   # part 2 
   deploy:
@@ -40,7 +40,7 @@ jobs:
           aws-region: us-east-1
 
       # synchronization of website files (HTML, CSS) to S3
-      - name: Deploy Frontend to S3
+    name: Deploy Frontend to S3
         run: |
           aws s3 cp index.html s3://shani-cloud-resume-2026/index.html
           aws s3 cp style.css s3://shani-cloud-resume-2026/style.css
