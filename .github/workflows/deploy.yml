@@ -1,0 +1,46 @@
+name: CI/CD Pipeline
+
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  # part 1
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run Tests
+        run: |
+          pip install pytest
+          pytest lambda/test_lambda.py
+
+  # part 2 
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      # synchronization of website files (HTML, CSS) to S3
+      - name: Deploy Frontend to S3
+        run: |
+          aws s3 cp index.html s3://shani-cloud-resume-2026/index.html
+          aws s3 cp style.css s3://shani-cloud-resume-2026/style.css
